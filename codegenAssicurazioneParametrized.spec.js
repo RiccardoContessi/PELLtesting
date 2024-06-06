@@ -1,18 +1,24 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect, devices, chromium  } from '@playwright/test';
 
 test('test', async ({ page }) => {
+    const browser = await chromium.launch({
+        headless: false, // Lancia il browser in modalità non-headless per il debugging
+    });
+    
+
+    test.setTimeout(100000);  
+
     // Parametri
-    const timeout = 100000;
     const url = 'https://www.facile.it/';
     const viewport = { width: 1920, height: 1080 };
     const delay = 2000;
-    const dateOfBirth = '12 / 12 / 1996A';
-    const placeOfBirth = 'Berg';
+    const dateOfBirth = '12/12/1996';
+    const placeOfBirth = 'Bergamo';
     const educationalQualification = 'secondarySchool';
     const occupation = 'retired';
     const plateNumber = 'FH922YC';
-    const firstRegistrationDate = '01 / 2017A';
-    const purchaseYear = '2022A';
+    const firstRegistrationDate = '01/2017';
+    const purchaseYear = '2022';
     const makeOption = '000083';
     const modelOption = '003956';
     const equipmentOption = '085130';
@@ -61,18 +67,38 @@ test('test', async ({ page }) => {
     const consentCheckbox3 = page.locator('label').filter({ hasText: 'Acconsento al trattamento e' }).locator('div').nth(1);
     const compareQuotesButton = page.getByRole('button', { name: 'Confronta Preventivi' });
 
-    // Imposta un timeout più lungo, ad esempio 60 secondi
-    test.setTimeout(timeout);  
+    
 
-    await page.goto(url);
+    // Passo 1
+    const startTime1 = performance.now();
+    const response = await page.goto('https://www.facile.it/');
+    expect(response.status()).toBe(200);
+    const endTime1 = performance.now();
+    console.log(`Passo 1 eseguito in ${endTime1 - startTime1} ms`);
 
-    // abilita la dark mode
-    await page.emulateMedia({ colorScheme: 'dark' });
 
-    await page.setViewportSize(viewport);
-    await page.waitForTimeout(delay);
+
+    // Passo 2
+    const startTime2 = performance.now();
     await acceptAllButton.click();
+    expect(await getQuoteLink.isEnabled()).toBeTruthy();
+    const endTime2 = performance.now();
+    console.log(`Passo 2 eseguito in ${endTime2 - startTime2} ms`);
+
+
+
+    // Passo 3
+    const startTime3 = performance.now();
     await getQuoteLink.click();
+    const response3 = await page.waitForResponse(response => response.status() === 200);
+    expect(response3.ok()).toBeTruthy();
+    const endTime3 = performance.now();
+    console.log(`Passo 3 eseguito in ${endTime3 - startTime3} ms`);
+
+
+
+    // Passo 4
+    const startTime4 = performance.now();
     await genderOption.click();
     await birthDatePlaceholder.click();
     await birthDatePlaceholder.fill(dateOfBirth);
@@ -82,41 +108,47 @@ test('test', async ({ page }) => {
     await educationalQualificationSelect.selectOption(educationalQualification);
     await occupationSelect.selectOption(occupation);
     await proceedButton.click();
+    const response4 = await page.waitForResponse(response => response.status() === 200);
+    expect(response4.ok()).toBeTruthy();
+    const endTime4 = performance.now();
+    console.log(`Passo 4 eseguito in ${endTime4 - startTime4} ms`);
 
-    const textboxes0 = page.locator('role=textbox');
-    await textboxes0.nth(0).click();
 
+
+     // Passo 5
+    const startTime5 = performance.now();
     await plateNumberInput.click();
     await plateNumberInput.fill(plateNumber);
-
-    // Attendi che il popup di caricamento scompaia
     const targaTrovata = await page.locator('select[name="equipment"]').isVisible();
-
     if (!targaTrovata) {
         await page.waitForTimeout(32000);
     }
-
     const infoAggiuntive = await firstRegistrationPlaceholder.isVisible();
     if (infoAggiuntive) {
-        // Se l'elemento è visibile, procedi con le operazioni
-        await firstRegistrationPlaceholder.click();   // prima immatricolazione
+        await firstRegistrationPlaceholder.click();
         await firstRegistrationPlaceholder.fill(firstRegistrationDate);
     }
-
     await purchaseYearInput.click();
     await purchaseYearInput.fill(purchaseYear);
-
     if (infoAggiuntive) {
-        await makeSelect.selectOption(makeOption); // marca 
-        await modelSelect.selectOption(modelOption); // modello 
+        await makeSelect.selectOption(makeOption);
+        await modelSelect.selectOption(modelOption);
     }
-
-    await equipmentSelect.selectOption(equipmentOption); // allestimento
-    await additionalFuelSelect.selectOption(additionalFuelOption); // alimentazione aggiuntiva. non c'è sempre
-    await securityDeviceSelect.selectOption(securityDeviceOption); // antifurto
-    await overnightParkingSelect.selectOption(overnightParkingOption); // dove tieni auto
+    await equipmentSelect.selectOption(equipmentOption);
+    await additionalFuelSelect.selectOption(additionalFuelOption);
+    await securityDeviceSelect.selectOption(securityDeviceOption);
+    await overnightParkingSelect.selectOption(overnightParkingOption);
     await proceedButton.click();
+    const response5 = await page.waitForResponse(response => response.status() === 200);
+    expect(response5.ok()).toBeTruthy();
+    const endTime5 = performance.now();
+    console.log(`Passo 5 eseguito in ${endTime5 - startTime5} ms`);
 
+
+
+
+    // Passo 6
+    const startTime6 = performance.now();
     await firstNamePlaceholder.click();
     await firstNamePlaceholder.fill(firstName);
     await firstNamePlaceholder.press('Tab');
@@ -136,5 +168,19 @@ test('test', async ({ page }) => {
     await consentCheckbox1.click();
     await consentCheckbox2.click();
     await consentCheckbox3.click();
-    await compareQuotesButton.click(); 
+    await compareQuotesButton.click();
+    const response6 = await page.waitForResponse(response => response.status() === 200);
+    expect(response6.ok()).toBeTruthy();
+    const endTime6 = performance.now();
+    console.log(`Passo 6 eseguito in ${endTime6 - startTime6} ms`);
+
+    
+    // Passo 7
+    const startTime7 = performance.now();
+    const response7 = await page.goto(url);
+    expect(response7.status()).toBe(200);
+    const endTime7 = performance.now();
+    console.log(`Passo 7 eseguito in ${endTime7 - startTime7} ms`);
+    
+    await browser.close();
 });
